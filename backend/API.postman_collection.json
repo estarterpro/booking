@@ -1,0 +1,606 @@
+{
+  "info": {
+    "_postman_id": "1234567-89ab-cdef-0123-456789abcdef",
+    "name": "Transport Reservation System",
+    "description": "API Collection for Transport Reservation System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": "{{base_url}}/api/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Search Transport",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"origen\": \"Bogotá\",\n    \"destino\": \"Chía\",\n    \"fecha_ida\": \"2024-12-01\",\n    \"hora_ida\": \"08:00\",\n    \"cant_personas\": 4,\n    \"tipo_servicio\": \"ida\",\n    \"ubicacion_id\": 1\n}"
+            },
+            "url": "{{base_url}}/api/search"
+          }
+        },
+        {
+          "name": "Search Round Trip Transport",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"origen\": \"Bogotá\",\n    \"destino\": \"Chía\",\n    \"fecha_ida\": \"2024-12-01\",\n    \"hora_ida\": \"08:00\",\n    \"fecha_regreso\": \"2024-12-02\",\n    \"hora_regreso\": \"18:00\",\n    \"cant_personas\": 4,\n    \"tipo_servicio\": \"ida_y_regreso\",\n    \"ubicacion_id\": 1\n}"
+            },
+            "url": "{{base_url}}/api/search"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Generate Wompi Signature",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reference\": \"RESERVA-123\",\n    \"amountInCents\": 9000000,\n    \"currency\": \"COP\"\n}"
+            },
+            "url": "{{base_url}}/api/payments/signature"
+          }
+        },
+        {
+          "name": "Wompi Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"data\": {\n        \"transaction\": {\n            \"id\": \"1234-5678\",\n            \"status\": \"APPROVED\",\n            \"reference\": \"RESERVA-123\"\n        }\n    },\n    \"timestamp\": 1234567890,\n    \"signature\": {\n        \"properties\": [\"transaction.id\", \"transaction.status\"],\n        \"checksum\": \"abc123\"\n    }\n}"
+            },
+            "url": "{{base_url}}/api/payments/webhook"
+          }
+        },
+        {
+          "name": "Get Transaction Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/payments/transactions/1234-5678"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reservations",
+      "item": [
+        {
+          "name": "Create Reservation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Juan Pérez\",\n    \"telefono\": \"3001234567\",\n    \"correo\": \"juan.perez@email.com\",\n    \"origen\": \"Bogotá\",\n    \"destino\": \"Chía\",\n    \"fecha_ida\": \"2024-12-01\",\n    \"hora_ida\": \"08:00\",\n    \"tipo_servicio\": \"ida\",\n    \"vehiculo_id\": 1,\n    \"ubicacion_id\": 1,\n    \"distancia_km\": 20.5,\n    \"distancia_minutos\": 40,\n    \"tarifa_total\": 120000,\n    \"notas_conductor\": \"El cliente tiene 3 maletas grandes.\",\n    \"transaction_id\": \"1234-5678\",\n    \"payment_reference\": \"RESERVA-123\",\n    \"payment_status\": \"APPROVED\",\n    \"payment_amount\": 12000000\n}"
+            },
+            "url": "{{base_url}}/api/reservas"
+          }
+        },
+        {
+          "name": "Get Reservations (Advanced Filtering)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/reservas?dateGroup=present&specificFilter=week&weekOffset=1&location=Bogotá&status=with_driver",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "dateGroup",
+                  "value": "present",
+                  "description": "Filter by date group (past/present)"
+                },
+                {
+                  "key": "specificFilter",
+                  "value": "week",
+                  "description": "Filter by specific time period (today/tomorrow/yesterday/week/month)"
+                },
+                {
+                  "key": "weekOffset",
+                  "value": "1",
+                  "description": "Week offset from current week"
+                },
+                {
+                  "key": "monthOffset",
+                  "value": "0",
+                  "description": "Month offset from current month"
+                },
+                {
+                  "key": "location",
+                  "value": "Bogotá",
+                  "description": "Filter by location"
+                },
+                {
+                  "key": "status",
+                  "value": "with_driver",
+                  "description": "Filter by reservation status"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Reservation Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"estado\": \"completada\"\n}"
+            },
+            "url": "{{base_url}}/api/reservas/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clients",
+      "item": [
+        {
+          "name": "Create Client",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Juan Pérez\",\n    \"telefono\": \"3001234567\",\n    \"correo\": \"juan.perez@email.com\"\n}"
+            },
+            "url": "{{base_url}}/api/clientes"
+          }
+        },
+        {
+          "name": "Get Clients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/clientes"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Locations",
+      "item": [
+        {
+          "name": "Create Location",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Bogotá\"\n}"
+            },
+            "url": "{{base_url}}/api/ubicaciones"
+          }
+        },
+        {
+          "name": "Get Locations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/ubicaciones"
+          }
+        },
+        {
+          "name": "Update Location",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Bogotá D.C.\"\n}"
+            },
+            "url": "{{base_url}}/api/ubicaciones/1"
+          }
+        },
+        {
+          "name": "Delete Location",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/ubicaciones/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vehicles",
+      "item": [
+        {
+          "name": "Create Vehicle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tipo\": \"SUV\",\n    \"cant_maxima_personas\": 4,\n    \"cant_maxima_maletas\": 3\n}"
+            },
+            "url": "{{base_url}}/api/vehiculos"
+          }
+        },
+        {
+          "name": "Get Vehicles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/vehiculos"
+          }
+        },
+        {
+          "name": "Update Vehicle",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tipo\": \"SUV Premium\",\n    \"cant_maxima_personas\": 5,\n    \"cant_maxima_maletas\": 4\n}"
+            },
+            "url": "{{base_url}}/api/vehiculos/1"
+          }
+        },
+        {
+          "name": "Delete Vehicle",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/vehiculos/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rates",
+      "item": [
+        {
+          "name": "Create Rate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehiculo_id\": 1,\n  \"ubicacion_id\": 1,\n  \"tarifa_base\": 80000,\n  \"km_incluidos\": 8,\n  \"band1_km_hasta\": 14,\n  \"band1_precio_km\": 4500,\n  \"band2_km_hasta\": 40,\n  \"band2_precio_km\": 9000,\n  \"band3_precio_km\": 4800\n}"
+            },
+            "url": "{{base_url}}/api/tarifas"
+          }
+        },
+        {
+          "name": "Get Rates",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/tarifas"
+          }
+        },
+        {
+          "name": "Update Rate",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tarifa_base\": 95000,\n  \"km_incluidos\": 10,\n  \"band1_km_hasta\": 14,\n  \"band1_precio_km\": 7700,\n  \"band2_km_hasta\": 18,\n  \"band2_precio_km\": 15500,\n  \"band3_precio_km\": 21000\n}"
+            },
+            "url": "{{base_url}}/api/tarifas/1"
+          }
+        },
+        {
+          "name": "Delete Rate",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/tarifas/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Drivers",
+      "item": [
+        {
+          "name": "Create Driver",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Carlos Gómez\",\n    \"telefono\": \"3109876543\",\n    \"placa\": \"ABC123\",\n    \"ubicacion_id\": 1,\n    \"vehiculo_id\": 1\n}"
+            },
+            "url": "{{base_url}}/api/conductores"
+          }
+        },
+        {
+          "name": "Get Drivers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/conductores?ubicacion_id=1&estado=disponible",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "conductores"
+              ],
+              "query": [
+                {
+                  "key": "ubicacion_id",
+                  "value": "1"
+                },
+                {
+                  "key": "estado",
+                  "value": "disponible"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Driver Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"estado\": \"ocupado\"\n}"
+            },
+            "url": "{{base_url}}/api/conductores/1/estado"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Service Orders",
+      "item": [
+        {
+          "name": "Create Service Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reserva_id\": 1,\n    \"conductor_id\": 2\n}"
+            },
+            "url": "{{base_url}}/api/ordenes-servicio"
+          }
+        },
+        {
+          "name": "Get Service Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/ordenes-servicio"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": "your_jwt_token_here"
+    }
+  ]
+}

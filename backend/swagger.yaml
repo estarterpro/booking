@@ -1,0 +1,223 @@
+openapi: 3.0.0
+info:
+  title: Transport Reservation System API
+  version: 1.0.0
+  description: API for managing transport reservations, drivers, and clients
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Client:
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: "Juan Pérez"
+        telefono:
+          type: string
+          example: "3001234567"
+        correo:
+          type: string
+          format: email
+          example: "juan.perez@email.com"
+      required:
+        - nombre
+        - telefono
+        - correo
+
+    Reservation:
+      type: object
+      properties:
+        cliente_id:
+          type: integer
+          example: 1
+        origen:
+          type: string
+          example: "Bogotá"
+        destino:
+          type: string
+          example: "Chía"
+        fecha_ida:
+          type: string
+          format: date
+          example: "2024-12-01"
+        hora_ida:
+          type: string
+          example: "08:00"
+        fecha_regreso:
+          type: string
+          format: date
+          example: "2024-12-02"
+        hora_regreso:
+          type: string
+          example: "18:00"
+        tipo_servicio:
+          type: string
+          enum: [ida, ida_y_regreso]
+          example: "ida_y_regreso"
+        vehiculo_id:
+          type: integer
+          example: 1
+        ubicacion_id:
+          type: integer
+          example: 1
+        notas_conductor:
+          type: string
+          example: "El cliente tiene 3 maletas grandes."
+
+    Rate:
+      type: object
+      properties:
+        vehiculo_id:
+          type: integer
+          example: 1
+        ubicacion_id:
+          type: integer
+          example: 1
+        tarifa_base:
+          type: number
+          format: float
+          example: 90000
+        km_incluidos:
+          type: number
+          format: float
+          example: 8
+        band1_km_hasta:
+          type: number
+          format: float
+          example: 12
+        band1_precio_km:
+          type: number
+          format: float
+          example: 7500
+        band2_km_hasta:
+          type: number
+          format: float
+          example: 16
+        band2_precio_km:
+          type: number
+          format: float
+          example: 15000
+        band3_precio_km:
+          type: number
+          format: float
+          example: 20000
+
+paths:
+  /login:
+    post:
+      summary: Authenticate user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        200:
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+
+  /clientes:
+    post:
+      summary: Create a new client
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Client"
+      responses:
+        201:
+          description: Client created successfully
+
+    get:
+      summary: Get all clients
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: List of clients
+
+  /reservas:
+    post:
+      summary: Create a new reservation
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Reservation"
+      responses:
+        201:
+          description: Reservation created successfully
+
+    get:
+      summary: Get reservations
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: estado
+          schema:
+            type: string
+            enum: [pendiente, CONFIRMADA, consuctor_asignado, completada]
+        - in: query
+          name: ubicacion_id
+          schema:
+            type: integer
+        - in: query
+          name: vehiculo_id
+          schema:
+            type: integer
+      responses:
+        200:
+          description: List of reservations
+
+  /tarifas:
+    post:
+      summary: Create a new rate
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Rate"
+      responses:
+        201:
+          description: Rate created successfully
+
+    get:
+      summary: Get all rates
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: List of rates
