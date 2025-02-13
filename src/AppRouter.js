@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import App from './App';
-import Login from './components/dashboard/login';
+import Login from './components/dashboard/Login';
 import AdminLayout from './components/dashboard/AdminLayout';
 import ReservationsDashboard from './components/dashboard/ReservationsDashboard';
 import { useAuth } from './context/AuthContext';

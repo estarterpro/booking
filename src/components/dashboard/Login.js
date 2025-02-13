@@ -1,34 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { TextField, Button, Box, Typography, Paper } from '@mui/material';
+import { TextField, Button, Box, Typography, Paper, Alert } from '@mui/material';
+import api from '../../services/api';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Replace with your actual login API call
+      setLoading(true);
+      setError('');
       const response = await api.post('/login', { email, password });
       login(response.data.token);
       navigate('/admin');
     } catch (err) {
-      setError('Invalid credentials');
+      setError(err.response?.data?.message || 'Error al iniciar sesión');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <Paper elevation={3} sx={{ padding: 4, width: '300px' }}>
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
+      <Paper elevation={3} sx={{ padding: 4, width: '100%', maxWidth: '400px' }}>
         <Typography variant="h5" align="center" gutterBottom>
-          Admin Login
+          Iniciar Sesión
         </Typography>
-        {error && <Typography color="error" align="center">{error}</Typography>}
+        
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
         <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField
             label="Email"
@@ -36,16 +47,24 @@ function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            fullWidth
+            autoFocus
           />
           <TextField
-            label="Password"
+            label="Contraseña"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            fullWidth
           />
-          <Button type="submit" variant="contained">
-            Login
+          <Button 
+            type="submit" 
+            variant="contained" 
+            fullWidth
+            disabled={loading}
+          >
+            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </Button>
         </Box>
       </Paper>
