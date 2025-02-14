@@ -125,15 +125,20 @@ function RouteSelectionForm({ onError }) {
         fecha_ida: formData.fecha_ida
           ? formData.fecha_ida.toISOString().split("T")[0]
           : "",
-        hora_ida: formData.hora_ida
-          ? formData.hora_ida.toLocaleTimeString("es-ES", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : "",
-        fecha_regreso: formData.fecha_regreso
-          ? formData.fecha_regreso.toISOString().split("T")[0]
-          : "",
+fecha_ida: formData.fecha_ida
+  ? formData.fecha_ida.getFullYear() +
+    "-" +
+    String(formData.fecha_ida.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(formData.fecha_ida.getDate()).padStart(2, "0")
+  : "",
+fecha_regreso: formData.fecha_regreso
+  ? formData.fecha_regreso.getFullYear() +
+    "-" +
+    String(formData.fecha_regreso.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(formData.fecha_regreso.getDate()).padStart(2, "0")
+  : "",
         hora_regreso: formData.hora_regreso
           ? formData.hora_regreso.toLocaleTimeString("es-ES", {
               hour: "2-digit",

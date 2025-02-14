@@ -5,10 +5,15 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    setIsAuthenticated(!!token);
+    if (token) {
+      setIsAuthenticated(true);
+      // Here you could also decode the JWT to get user info
+      // and set it in the user state
+    }
     setIsLoading(false);
   }, []);
 
@@ -20,6 +25,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setIsAuthenticated(false);
+    setUser(null);
   };
 
   if (isLoading) {
@@ -27,7 +33,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -62,6 +62,56 @@ const createServiceOrder = async (req, res) => {
   }
 };
 
+const updateServiceOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { conductor_id } = req.body;
+
+    if (!conductor_id) {
+      return res.status(400).json({ message: 'El ID del conductor es requerido' });
+    }
+
+    const serviceOrder = await ServiceOrder.findById(id);
+    if (!serviceOrder) {
+      return res.status(404).json({ message: 'Orden de servicio no encontrada' });
+    }
+
+    const reservation = await Reservation.findById(serviceOrder.reserva_id);
+    if (!reservation) {
+      return res.status(404).json({ message: 'Reserva no encontrada' });
+    }
+
+    const reservationDateTime = `${reservation.fecha} ${reservation.hora}`;
+    const isAvailable = await checkDriverAvailability(
+      conductor_id,
+      reservationDateTime,
+      reservation.distancia_minutos
+    );
+
+    if (!isAvailable) {
+      return res.status(400).json({ 
+        message: 'El conductor no está disponible para este horario debido a otras reservas'
+      });
+    }
+
+    const updatedServiceOrder = await ServiceOrder.update(id, {
+      conductor_id,
+      fecha_asignacion: new Date()
+    });
+
+    await updateDriverStatusBasedOnTime(
+      conductor_id,
+      reservationDateTime,
+      reservation.distancia_minutos
+    );
+
+    res.json(updatedServiceOrder);
+  } catch (error) {
+    console.error('Error updating service order:', error);
+    res.status(400).json({ message: error.message });
+  }
+};
+
 const getServiceOrders = async (req, res) => {
   try {
     const serviceOrders = await ServiceOrder.findAll();
@@ -74,5 +124,6 @@ const getServiceOrders = async (req, res) => {
 
 module.exports = {
   createServiceOrder,
+  updateServiceOrder,
   getServiceOrders
 };

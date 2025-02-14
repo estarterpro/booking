@@ -110,4 +110,34 @@ export const login = async (credentials) => {
   }
 };
 
+export const getReservations = async (filters) => {
+  try {
+    const response = await api.get('/reservas', { params: filters });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching reservations:', error);
+    throw error;
+  }
+};
+
+export const getDrivers = async () => {
+  try {
+    const response = await api.get('/conductores');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching drivers:', error);
+    throw error;
+  }
+};
+
+export const assignDriver = async (reservaId, conductorId) => {
+  try {
+    const response = await api.post('/ordenes-servicio', { reserva_id: reservaId, conductor_id: conductorId });
+    return response.data;
+  } catch (error) {
+    console.error('Error assigning driver:', error);
+    throw error;
+  }
+};
+
 export default api;

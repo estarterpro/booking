@@ -728,7 +728,7 @@ BEGIN
   --UPDATE drivers SET estado = 'ocupado' WHERE id = p_conductor_id;
   
   -- Update reservation status
-  UPDATE reservations SET estado = '' WHERE id = p_reserva_id;
+  UPDATE reservations SET estado = 'ASIGNADO' WHERE id = p_reserva_id;
 END;
 $$;
 
@@ -778,5 +778,41 @@ BEGIN
   SELECT c.* 
   FROM clients c 
   WHERE c.correo = p_email;
+END;
+$$;
+
+
+
+-- Create stored procedure for user creation
+CREATE OR REPLACE PROCEDURE sp_create_user(
+  p_email VARCHAR(255),
+  p_password VARCHAR(255),
+  p_role VARCHAR(20),
+  INOUT p_id INTEGER DEFAULT NULL
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  INSERT INTO users (email, password, role)
+  VALUES (p_email, p_password, COALESCE(p_role, 'coordinator'))
+  RETURNING id INTO p_id;
+END;
+$$;
+
+-- Get user by email
+CREATE OR REPLACE FUNCTION sp_get_user_by_email(p_email VARCHAR)
+RETURNS TABLE (
+  id INTEGER,
+  email VARCHAR,
+  password VARCHAR,
+  role VARCHAR,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY 
+  SELECT u.* FROM users u WHERE u.email = p_email;
 END;
 $$;

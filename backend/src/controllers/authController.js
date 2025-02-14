@@ -1,25 +1,64 @@
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { User } = require('../models');
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ where: { email } });
 
-    if (!user || !bcrypt.compareSync(password, user.password)) {
-      return res.status(401).json({ message: 'Credenciales Invalidas' });
+    // Validar datos requeridos
+    if (!email || !password) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Email y contraseña son requeridos' 
+      });
     }
 
+    // Buscar usuario por email
+    const user = await User.findByEmail(email);
+    if (!user) {
+      return res.status(401).json({ 
+        success: false,
+        message: 'Credenciales inválidas' 
+      });
+    }
+
+    // Verificar contraseña
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ 
+        success: false,
+        message: 'Credenciales inválidas' 
+      });
+    }
+
+    // Generar token
     const token = jwt.sign(
-      { id: user.id, role: user.role },
+      { 
+        id: user.id, 
+        email: user.email,
+        role: user.role 
+      },
       process.env.JWT_SECRET,
       { expiresIn: '72h' }
     );
 
-    res.json({ token });
+    // Remover password del objeto de respuesta
+    const { password: _, ...userWithoutPassword } = user;
+
+    res.json({
+      success: true,
+      data: {
+        user: userWithoutPassword,
+        token
+      }
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Error en login:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error al iniciar sesión' 
+    });
   }
 };
 

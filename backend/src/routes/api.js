@@ -4,6 +4,7 @@ const auth = require("../middleware/auth");
 
 // Import controllers
 const authController = require("../controllers/authController");
+const userController = require("../controllers/userController");
 const clientController = require("../controllers/clientController");
 const driverController = require("../controllers/driverController");
 const rateController = require("../controllers/rateController");
@@ -17,6 +18,7 @@ const paymentController = require('../controllers/paymentController');
 
 // Auth routes
 router.post("/login", authController.login);
+router.post("/users", userController.createUser);
 
 // Mapbox test route
 router.post("/test/mapbox", mapboxTestController.testMapboxDistance);
@@ -55,6 +57,7 @@ router.patch(
 // Service Order routes
 router.post("/ordenes-servicio", serviceOrderController.createServiceOrder);
 router.get("/ordenes-servicio", serviceOrderController.getServiceOrders);
+router.patch("/ordenes-servicio/:id", auth, serviceOrderController.updateServiceOrder);
 
 // Location routes
 router.post("/ubicaciones", locationController.createLocation);

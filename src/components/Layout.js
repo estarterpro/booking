@@ -9,7 +9,7 @@ function Layout({ children }) {
       const sendHeight = () => {
         const height = document.documentElement.scrollHeight;
         window.parent.postMessage({ type: 'setHeight', height }, '*');
-      };
+      }; 
 
       // Enviar altura inicial
       sendHeight();

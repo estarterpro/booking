@@ -32,6 +32,31 @@ Response:
 }
 ```
 
+### Register User
+
+```http
+POST /api/users
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "123456",
+  "role": "admin"
+}
+
+Response:
+{
+    "success": true,
+    "data": {
+        "id": 1,
+        "email": "pedro@estarter.co",
+        "role": "admin",
+        "created_at": "2025-02-14T00:20:57.958Z",
+        "updated_at": "2025-02-14T00:20:57.958Z"
+    }
+}
+```
+
 ## Clients
 
 ### Create Client

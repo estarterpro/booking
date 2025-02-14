@@ -1,34 +1,44 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const db = require('../config/database');
 const bcrypt = require('bcryptjs');
 
-const User = sequelize.define('User', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-    validate: {
-      isEmail: true
-    }
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  role: {
-    type: DataTypes.ENUM('admin', 'coordinator'),
-    defaultValue: 'coordinator'
-  }
-});
+class User {
+  static async create(data) {
+    try {
+      // Verificar si el email ya existe
+      const existingUser = await this.findByEmail(data.email);
+      if (existingUser) {
+        throw new Error('El email ya está registrado');
+      }
 
-// Hash password before saving
-User.beforeCreate(async (user) => {
-  user.password = await bcrypt.hash(user.password, 10);
-});
+      // Encriptar contraseña
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      
+      // Crear usuario
+      const { rows } = await db.query(
+        'CALL sp_create_user($1, $2, $3, $4)',
+        [data.email, hashedPassword, data.role || 'coordinator', null]
+      );
+      
+      // Retornar usuario creado
+      return this.findByEmail(data.email);
+    } catch (error) {
+      console.error('Error in create user:', error);
+      throw error;
+    }
+  }
+
+  static async findByEmail(email) {
+    try {
+      const { rows } = await db.query(
+        'SELECT * FROM sp_get_user_by_email($1)',
+        [email]
+      );
+      return rows[0];
+    } catch (error) {
+      console.error('Error in findByEmail:', error);
+      throw error;
+    }
+  }
+}
 
 module.exports = User;
